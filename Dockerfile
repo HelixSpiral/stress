@@ -1,6 +1,16 @@
+FROM golang:latest AS builder
+
+WORKDIR /app
+
+COPY *.go .
+COPY go.* .
+
+RUN CGO_ENABLED=0 go build -a -tags netgo --ldflags '-w' -v -o stress . 
+
 FROM scratch
-MAINTAINER vishnuk@google.com
 
-ADD stress /
+WORKDIR /app
 
-ENTRYPOINT ["/stress", "-logtostderr"]
+COPY --from=builder /app/stress .
+
+CMD ["./stress", "-logtostderr"]
